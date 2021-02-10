@@ -46,7 +46,7 @@ namespace Blog.Core.Model.Seed
                 if (Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool())
                 {
                     var slaveIndex = 0;
-                    BaseDBConfig.MutiConnectionString.Item1.Where(x => x.ConnId != MainDb.CurrentDbConnId).ToList().ForEach(m =>
+                    BaseDBConfig.MutiConnectionString.allDbs.Where(x => x.ConnId != MainDb.CurrentDbConnId).ToList().ForEach(m =>
                     {
                         slaveIndex++;
                         Console.WriteLine($"Slave{slaveIndex} DB ID: {m.ConnId}");
@@ -58,7 +58,7 @@ namespace Blog.Core.Model.Seed
                 else if (Appsettings.app(new string[] { "CQRSEnabled" }).ObjToBool())
                 {
                     var slaveIndex = 0;
-                    BaseDBConfig.MutiConnectionString.Item2.Where(x => x.ConnId != MainDb.CurrentDbConnId).ToList().ForEach(m =>
+                    BaseDBConfig.MutiConnectionString.slaveDbs.Where(x => x.ConnId != MainDb.CurrentDbConnId).ToList().ForEach(m =>
                     {
                         slaveIndex++;
                         Console.WriteLine($"Slave{slaveIndex} DB ID: {m.ConnId}");
@@ -88,6 +88,8 @@ namespace Blog.Core.Model.Seed
                                  select t;
                 modelTypes.ToList().ForEach(t =>
                 {
+                    // 这里只支持添加表，不支持删除
+                    // 如果想要删除，数据库直接右键删除，或者联系SqlSugar作者；
                     if (!myContext.Db.DbMaintenance.IsAnyTable(t.Name))
                     {
                         Console.WriteLine(t.Name);
@@ -101,6 +103,22 @@ namespace Blog.Core.Model.Seed
 
                 if (Appsettings.app(new string[] { "AppSettings", "SeedDBDataEnabled" }).ObjToBool())
                 {
+                    JsonSerializerSettings setting = new JsonSerializerSettings();
+                    JsonConvert.DefaultSettings = new Func<JsonSerializerSettings>(() =>
+                    {
+                        //日期类型默认格式化处理
+                        setting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
+                        setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+
+                        //空值处理
+                        setting.NullValueHandling = NullValueHandling.Ignore;
+
+                        //高级用法九中的Bool类型转换 设置
+                        //setting.Converters.Add(new BoolConvert("是,否"));
+
+                        return setting;
+                    });
+
                     Console.WriteLine($"Seeding database data (The Db Id:{MyContext.ConnId})...");
 
                     #region BlogArticle
@@ -119,21 +137,7 @@ namespace Blog.Core.Model.Seed
                     #region Modules
                     if (!await myContext.Db.Queryable<Modules>().AnyAsync())
                     {
-                        JsonSerializerSettings setting = new JsonSerializerSettings();
-                        JsonConvert.DefaultSettings = new Func<JsonSerializerSettings>(() =>
-                        {
-                            //日期类型默认格式化处理
-                            setting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
-                            setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
 
-                            //空值处理
-                            setting.NullValueHandling = NullValueHandling.Ignore;
-
-                            //高级用法九中的Bool类型转换 设置
-                            //    setting.Converters.Add(new BoolConvert("是,否"));
-
-                            return setting;
-                        });
 
 
                         var data = JsonConvert.DeserializeObject<List<Modules>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Modules"), Encoding.UTF8), setting);
@@ -151,7 +155,9 @@ namespace Blog.Core.Model.Seed
                     #region Permission
                     if (!await myContext.Db.Queryable<Permission>().AnyAsync())
                     {
-                        myContext.GetEntityDB<Permission>().InsertRange(JsonHelper.ParseFormByJson<List<Permission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Permission"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<Permission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Permission"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<Permission>().InsertRange(data);
                         Console.WriteLine("Table:Permission created success!");
                     }
                     else
@@ -164,7 +170,9 @@ namespace Blog.Core.Model.Seed
                     #region Role
                     if (!await myContext.Db.Queryable<Role>().AnyAsync())
                     {
-                        myContext.GetEntityDB<Role>().InsertRange(JsonHelper.ParseFormByJson<List<Role>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Role"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<Role>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Role"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<Role>().InsertRange(data);
                         Console.WriteLine("Table:Role created success!");
                     }
                     else
@@ -177,7 +185,9 @@ namespace Blog.Core.Model.Seed
                     #region RoleModulePermission
                     if (!await myContext.Db.Queryable<RoleModulePermission>().AnyAsync())
                     {
-                        myContext.GetEntityDB<RoleModulePermission>().InsertRange(JsonHelper.ParseFormByJson<List<RoleModulePermission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "RoleModulePermission"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<RoleModulePermission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "RoleModulePermission"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<RoleModulePermission>().InsertRange(data);
                         Console.WriteLine("Table:RoleModulePermission created success!");
                     }
                     else
@@ -190,7 +200,9 @@ namespace Blog.Core.Model.Seed
                     #region Topic
                     if (!await myContext.Db.Queryable<Topic>().AnyAsync())
                     {
-                        myContext.GetEntityDB<Topic>().InsertRange(JsonHelper.ParseFormByJson<List<Topic>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Topic"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<Topic>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Topic"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<Topic>().InsertRange(data);
                         Console.WriteLine("Table:Topic created success!");
                     }
                     else
@@ -203,7 +215,9 @@ namespace Blog.Core.Model.Seed
                     #region TopicDetail
                     if (!await myContext.Db.Queryable<TopicDetail>().AnyAsync())
                     {
-                        myContext.GetEntityDB<TopicDetail>().InsertRange(JsonHelper.ParseFormByJson<List<TopicDetail>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "TopicDetail"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<TopicDetail>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "TopicDetail"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<TopicDetail>().InsertRange(data);
                         Console.WriteLine("Table:TopicDetail created success!");
                     }
                     else
@@ -216,7 +230,9 @@ namespace Blog.Core.Model.Seed
                     #region UserRole
                     if (!await myContext.Db.Queryable<UserRole>().AnyAsync())
                     {
-                        myContext.GetEntityDB<UserRole>().InsertRange(JsonHelper.ParseFormByJson<List<UserRole>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "UserRole"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<UserRole>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "UserRole"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<UserRole>().InsertRange(data);
                         Console.WriteLine("Table:UserRole created success!");
                     }
                     else
@@ -229,7 +245,9 @@ namespace Blog.Core.Model.Seed
                     #region sysUserInfo
                     if (!await myContext.Db.Queryable<sysUserInfo>().AnyAsync())
                     {
-                        myContext.GetEntityDB<sysUserInfo>().InsertRange(JsonHelper.ParseFormByJson<List<sysUserInfo>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "sysUserInfo"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<sysUserInfo>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "sysUserInfo"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<sysUserInfo>().InsertRange(data);
                         Console.WriteLine("Table:sysUserInfo created success!");
                     }
                     else
@@ -242,7 +260,9 @@ namespace Blog.Core.Model.Seed
                     #region TasksQz
                     if (!await myContext.Db.Queryable<TasksQz>().AnyAsync())
                     {
-                        myContext.GetEntityDB<TasksQz>().InsertRange(JsonHelper.ParseFormByJson<List<TasksQz>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "TasksQz"), Encoding.UTF8)));
+                        var data = JsonConvert.DeserializeObject<List<TasksQz>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "TasksQz"), Encoding.UTF8), setting);
+
+                        myContext.GetEntityDB<TasksQz>().InsertRange(data);
                         Console.WriteLine("Table:TasksQz created success!");
                     }
                     else
@@ -259,7 +279,10 @@ namespace Blog.Core.Model.Seed
             }
             catch (Exception ex)
             {
-                throw new Exception("1、如果使用的是Mysql，生成的数据库字段字符集可能不是utf8的，手动修改下，或者尝试方案：删掉数据库，在连接字符串后加上CharSet=UTF8mb4，重新生成数据库. \n 2、其他错误：" + ex.Message);
+                throw new Exception(
+                    $"1、若是Mysql,查看常见问题:https://github.com/anjoy8/Blog.Core/issues/148#issue-776281770" +
+                    $"2、若是Oracle,查看常见问题:https://github.com/anjoy8/Blog.Core/issues/148#issuecomment-752340231" +
+                    "3、其他错误：" + ex.Message);
             }
         }
     }

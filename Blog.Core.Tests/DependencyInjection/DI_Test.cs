@@ -33,7 +33,7 @@ namespace Blog.Core.Tests
         {
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
-            IServiceCollection services = new ServiceCollection();
+            IServiceCollection services = new ServiceCollection().AddLogging();
             services.AddAutoMapper(typeof(Startup));
 
             services.AddScoped<SqlSugar.ISqlSugarClient>(o =>
@@ -90,12 +90,12 @@ namespace Blog.Core.Tests
         /// </summary>
         public static MutiDBOperate GetMainConnectionDb()
         {
-            var mainConnetctDb = BaseDBConfig.MutiConnectionString.Item1.Find(x => x.ConnId == MainDb.CurrentDbConnId);
-            if (BaseDBConfig.MutiConnectionString.Item1.Count > 0)
+            var mainConnetctDb = BaseDBConfig.MutiConnectionString.allDbs.Find(x => x.ConnId == MainDb.CurrentDbConnId);
+            if (BaseDBConfig.MutiConnectionString.allDbs.Count > 0)
             {
                 if (mainConnetctDb == null)
                 {
-                    mainConnetctDb = BaseDBConfig.MutiConnectionString.Item1[0];
+                    mainConnetctDb = BaseDBConfig.MutiConnectionString.allDbs[0];
                 }
             }
             else
