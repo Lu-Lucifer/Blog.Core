@@ -69,6 +69,16 @@ namespace Blog.Core.Extensions
                     ConsoleHelper.WriteSuccessLine($"Service Log AOP: True");
                 }
 
+                // 开启的中间件日志
+                var requestResponseLogOpen = Appsettings.app(new string[] { "Middleware", "RequestResponseLog", "Enabled" }).ObjToBool();
+                var ipLogOpen = Appsettings.app(new string[] { "Middleware", "IPLog", "Enabled" }).ObjToBool();
+                var recordAccessLogsOpen = Appsettings.app(new string[] { "Middleware", "RecordAccessLogs", "Enabled" }).ObjToBool();
+                ConsoleHelper.WriteSuccessLine($"OPEN Log: " +
+                    (requestResponseLogOpen ? "RequestResponseLog √," : "") +
+                    (ipLogOpen ? "IPLog √," : "") +
+                    (recordAccessLogsOpen ? "RecordAccessLogs √," : "")
+                    );
+
                 // 事务AOP
                 if (!Appsettings.app(new string[] { "AppSettings", "TranAOP", "Enabled" }).ObjToBool())
                 {
@@ -109,6 +119,16 @@ namespace Blog.Core.Extensions
                     ConsoleHelper.WriteSuccessLine($"IpRateLimiting: True");
                 }
 
+                // 性能分析
+                if (!Appsettings.app("Startup", "MiniProfiler", "Enabled").ObjToBool())
+                {
+                    Console.WriteLine($"MiniProfiler: False");
+                }
+                else
+                {
+                    ConsoleHelper.WriteSuccessLine($"MiniProfiler: True");
+                }
+
                 // CORS跨域
                 if (!Appsettings.app("Startup", "Cors", "EnableAllIPs").ObjToBool())
                 {
@@ -116,7 +136,7 @@ namespace Blog.Core.Extensions
                 }
                 else
                 {
-                    ConsoleHelper.WriteSuccessLine($"EnableAllIPs For EnableAllIPs: True");
+                    ConsoleHelper.WriteSuccessLine($"EnableAllIPs For CORS: True");
                 }
 
                 // redis消息队列

@@ -11,9 +11,11 @@ using Blog.Core.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -116,6 +118,8 @@ namespace Blog.Core
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
             });
 
+            services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
+
             _services = services;
             //支持编码大全 例如:支持 System.Text.Encoding.GetEncoding("GB2312")  System.Text.Encoding.GetEncoding("GB18030") 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -125,6 +129,7 @@ namespace Blog.Core
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new AutofacModuleRegister());
+            builder.RegisterModule<AutofacPropertityModuleReg>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -185,11 +190,11 @@ namespace Blog.Core
             app.UseAuthentication();
             // 然后是授权中间件
             app.UseAuthorization();
-
+            //开启性能分析
+            app.UseMiniProfilerMildd();
             // 开启异常中间件，要放到最后
             //app.UseExceptionHandlerMidd();
-            // 性能分析
-            app.UseMiniProfiler();
+
 
             app.UseEndpoints(endpoints =>
             {
