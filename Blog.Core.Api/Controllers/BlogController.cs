@@ -22,7 +22,7 @@ namespace Blog.Core.Controllers
     /// </summary>
     [Produces("application/json")]
     [Route("api/Blog")]
-    public class BlogController : BaseApiCpntroller
+    public class BlogController : BaseApiController
     {
         public IBlogArticleServices _blogArticleServices { get; set; }
         private readonly ILogger<BlogController> _logger;
@@ -132,7 +132,7 @@ namespace Blog.Core.Controllers
         {
             if (types.IsNotEmptyOrNull())
             {
-                var blogs = await _blogArticleServices.Query(d => d.bcategory != null && types.Contains(d.bcategory) && d.IsDeleted == false);
+                var blogs = await _blogArticleServices.Query(d => d.bcategory != null && types.Contains(d.bcategory) && d.IsDeleted == false, d => d.bID, false);
                 return Success(blogs);
             }
             return Success(new List<BlogArticle>() { });

@@ -7,9 +7,9 @@ using Blog.Core.Common;
 using Blog.Core.Common.AppConfig;
 using Blog.Core.Common.DB;
 using Blog.Core.Common.LogHelper;
+using Blog.Core.Common.Seed;
 using Blog.Core.IRepository.Base;
 using Blog.Core.IServices;
-using Blog.Core.Model.Seed;
 using Blog.Core.Repository.Base;
 using Blog.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +38,7 @@ namespace Blog.Core.Tests
 
             services.AddScoped<SqlSugar.ISqlSugarClient>(o =>
             {
-                return new SqlSugar.SqlSugarClient(new SqlSugar.ConnectionConfig()
+                return new SqlSugar.SqlSugarScope(new SqlSugar.ConnectionConfig()
                 {
                     ConnectionString = GetMainConnectionDb().Connection,//必填, 数据库连接字符串
                     DbType = (SqlSugar.DbType)GetMainConnectionDb().DbType,//必填, 数据库类型
@@ -150,7 +150,7 @@ namespace Blog.Core.Tests
 
             services.AddScoped<SqlSugar.ISqlSugarClient>(o =>
             {
-                return new SqlSugar.SqlSugarClient(new SqlSugar.ConnectionConfig()
+                return new SqlSugar.SqlSugarScope(new SqlSugar.ConnectionConfig()
                 {
                     ConnectionString = GetMainConnectionDb().Connection,//必填, 数据库连接字符串
                     DbType = (SqlSugar.DbType)GetMainConnectionDb().DbType,//必填, 数据库类型
