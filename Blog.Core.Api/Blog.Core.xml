@@ -137,6 +137,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Blog.Core.Controllers.MigrateController.SaveData2ExcelAsync">
+            <summary>
+            权限数据库导出excel
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Blog.Core.Controllers.HealthCheckController">
             <summary>
             健康检查
@@ -646,6 +652,7 @@
             <param name="sysUserInfoServices"></param>
             <param name="userRoleServices"></param>
             <param name="roleServices"></param>
+            <param name="departmentServices"></param>
             <param name="user"></param>
             <param name="mapper"></param>
             <param name="logger"></param>
@@ -744,6 +751,14 @@
             <param name="doubanApi"></param>
             <param name="httpPollyHelper"></param>
         </member>
+        <member name="M:Blog.Core.Controllers.ValuesController.TestSqlsugarWithCache">
+            <summary>
+            测试SqlSugar二级缓存
+            可设置过期时间
+            或通过接口方式更新该数据，也会离开清除缓存
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Blog.Core.Controllers.ValuesController.Get">
             <summary>
             Get方法
@@ -809,18 +824,6 @@
             测试 post 参数
             </summary>
             <param name="name"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Blog.Core.Controllers.ValuesController.RestsharpGet">
-            <summary>
-            测试http请求 RestSharp Get
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Blog.Core.Controllers.ValuesController.RestsharpPost">
-            <summary>
-            测试http请求 RestSharp Post
-            </summary>
             <returns></returns>
         </member>
         <member name="M:Blog.Core.Controllers.ValuesController.TestMutiDBAPI">
